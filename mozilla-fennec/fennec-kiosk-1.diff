@@ -1,0 +1,193 @@
+diff --git a/mobile/android/base/java/org/mozilla/gecko/BrowserApp.java b/mobile/android/base/java/org/mozilla/gecko/BrowserApp.java
+--- a/mobile/android/base/java/org/mozilla/gecko/BrowserApp.java
++++ b/mobile/android/base/java/org/mozilla/gecko/BrowserApp.java
+@@ -742,16 +742,61 @@ public class BrowserApp extends GeckoApp
+             public void onScreenshotTaken(String data, String title) {
+                 // Treat screenshots as a sharing method.
+                 Telemetry.sendUIEvent(TelemetryContract.Event.SHARE, TelemetryContract.Method.BUTTON, "screenshot");
+             }
+         });
+ 
+         // Set the maximum bits-per-pixel the favicon system cares about.
+         IconDirectoryEntry.setMaxBPP(GeckoAppShell.getScreenDepth());
++        //massey added:
++        setFullScreen(true);
++
++        View decorView = getWindow().getDecorView();
++decorView.setOnSystemUiVisibilityChangeListener
++        (new View.OnSystemUiVisibilityChangeListener() {
++    @Override
++    public void onSystemUiVisibilityChange(int visibility) {
++        // Note that system bars will only be "visible" if none of the
++        // LOW_PROFILE, HIDE_NAVIGATION, or FULLSCREEN flags are set.
++        // int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_STABLE|
++        //          View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
++        //          View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
++        //          View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
++        //          View.SYSTEM_UI_FLAG_LAYOUT_STABLE|
++        //          View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
++        //          View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
++        //          View.SYSTEM_UI_FLAG_FULLSCREEN;
++        //getWindow().getDecorView().setSystemUiVisibility(uiOptions);
++        //setFullScreen(true);
++        
++        ThreadUtils.postToUiThread(new Runnable() {
++         @Override
++           public void run() {
++               ActivityUtils.setFullScreen(BrowserApp.this, true);
++           }
++        });
++        
++        if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
++            // TODO: The system bars are visible. Make any desired
++            // adjustments to your UI, such as showing the action bar or
++            // other navigational controls.
++            
++            setFullScreen(true);
++        } else {
++            // TODO: The system bars are NOT visible. Make any desired
++            // adjustments to your UI, such as hiding the action bar or
++            // other navigational controls.
++            //setFullScreen(true);
++        }
++    }
++});
++//end massey code addition
++
++
+     }
+ 
+     private void conditionallyNotifyHCEOL() {
+         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
+         try {
+             final SharedPreferences prefs = GeckoSharedPrefs.forProfile(this);
+             if (!prefs.getBoolean(HONEYCOMB_EOL_NOTIFIED, false)) {
+ 
+diff --git a/mobile/android/base/java/org/mozilla/gecko/GeckoApp.java b/mobile/android/base/java/org/mozilla/gecko/GeckoApp.java
+--- a/mobile/android/base/java/org/mozilla/gecko/GeckoApp.java
++++ b/mobile/android/base/java/org/mozilla/gecko/GeckoApp.java
+@@ -2812,19 +2812,31 @@ public abstract class GeckoApp
+         if (Versions.preICS) {
+             return;
+         }
+ 
+         ThreadUtils.postToUiThread(new Runnable() {
+             @Override
+             public void run() {
+                 if (visible) {
+-                    mMainLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
++                    // mMainLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
++                    mMainLayout.setSystemUiVisibility( View.SYSTEM_UI_FLAG_LAYOUT_STABLE|
++                         View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
++                         View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
++                         View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
++                         View.SYSTEM_UI_FLAG_FULLSCREEN |
++                         View.SYSTEM_UI_FLAG_IMMERSIVE);
+                 } else {
+-                    mMainLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
++                    //  mMainLayout.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
++                     mMainLayout.setSystemUiVisibility( View.SYSTEM_UI_FLAG_LAYOUT_STABLE|
++                         View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
++                         View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
++                         View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
++                         View.SYSTEM_UI_FLAG_FULLSCREEN |
++                         View.SYSTEM_UI_FLAG_IMMERSIVE);
+                 }
+             }
+         });
+     }
+ 
+     protected HealthRecorder createHealthRecorder(final Context context,
+                                                   final String profilePath,
+                                                   final EventDispatcher dispatcher,
+diff --git a/mobile/android/base/java/org/mozilla/gecko/util/ActivityUtils.java b/mobile/android/base/java/org/mozilla/gecko/util/ActivityUtils.java
+--- a/mobile/android/base/java/org/mozilla/gecko/util/ActivityUtils.java
++++ b/mobile/android/base/java/org/mozilla/gecko/util/ActivityUtils.java
+@@ -17,28 +17,39 @@ public class ActivityUtils {
+     }
+ 
+     public static void setFullScreen(Activity activity, boolean fullscreen) {
+         // Hide/show the system notification bar
+         Window window = activity.getWindow();
+ 
+         if (Versions.feature16Plus) {
+             final int newVis;
+-            if (fullscreen) {
+-                newVis = View.SYSTEM_UI_FLAG_FULLSCREEN |
+-                         View.SYSTEM_UI_FLAG_LOW_PROFILE;
+-            } else {
+-                newVis = View.SYSTEM_UI_FLAG_VISIBLE;
+-            }
++            //if (fullscreen) {
++                newVis = View.SYSTEM_UI_FLAG_LAYOUT_STABLE|
++                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
++                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
++                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
++                    View.SYSTEM_UI_FLAG_FULLSCREEN |
++                    View.SYSTEM_UI_FLAG_IMMERSIVE;
++                
++                //} else {
++                //newVis = View.SYSTEM_UI_FLAG_VISIBLE;
++                //}
+ 
+             window.getDecorView().setSystemUiVisibility(newVis);
+         } else {
+-            window.setFlags(fullscreen ?
+-                            WindowManager.LayoutParams.FLAG_FULLSCREEN : 0,
++            //window.setFlags(fullscreen ?
++            //              WindowManager.LayoutParams.FLAG_FULLSCREEN : 0,
++            //              WindowManager.LayoutParams.FLAG_FULLSCREEN);
++            window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                             WindowManager.LayoutParams.FLAG_FULLSCREEN);
++            window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
++                            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
++            window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
++                            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
+         }
+     }
+ 
+     public static boolean isFullScreen(final Activity activity) {
+         final Window window = activity.getWindow();
+ 
+         if (Versions.feature16Plus) {
+             final int vis = window.getDecorView().getSystemUiVisibility();
+diff --git a/mobile/android/branding/unofficial/configure.sh b/mobile/android/branding/unofficial/configure.sh
+--- a/mobile/android/branding/unofficial/configure.sh
++++ b/mobile/android/branding/unofficial/configure.sh
+@@ -1,8 +1,8 @@
+ # This Source Code Form is subject to the terms of the Mozilla Public
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+ ANDROID_PACKAGE_NAME=org.mozilla.fennec_`echo $USER | sed 's/-/_/g'`
+-MOZ_APP_DISPLAYNAME="Fennec `echo $USER | sed 's/-/_/g'`"
++MOZ_APP_DISPLAYNAME="KioskFennec `echo $USER | sed 's/-/_/g'`"
+ MOZ_UPDATER=
+ MOZ_ANDROID_ANR_REPORTER=
+diff --git a/mobile/android/branding/unofficial/locales/en-US/brand.dtd b/mobile/android/branding/unofficial/locales/en-US/brand.dtd
+--- a/mobile/android/branding/unofficial/locales/en-US/brand.dtd
++++ b/mobile/android/branding/unofficial/locales/en-US/brand.dtd
+@@ -1,7 +1,7 @@
+ <!-- This Source Code Form is subject to the terms of the Mozilla Public
+    - License, v. 2.0. If a copy of the MPL was not distributed with this
+    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+ 
+-<!ENTITY  brandShortName  "Fennec">
+-<!ENTITY  brandFullName   "Mozilla Fennec">
+-<!ENTITY  vendorShortName "Mozilla">
+\ No newline at end of file
++<!ENTITY  brandShortName  "KioskFennec">
++<!ENTITY  brandFullName   "Mozilla Fennec Kiosk">
++<!ENTITY  vendorShortName "MozillaKiosk">
+diff --git a/mobile/android/branding/unofficial/locales/en-US/brand.properties b/mobile/android/branding/unofficial/locales/en-US/brand.properties
+--- a/mobile/android/branding/unofficial/locales/en-US/brand.properties
++++ b/mobile/android/branding/unofficial/locales/en-US/brand.properties
+@@ -1,6 +1,6 @@
+ # This Source Code Form is subject to the terms of the Mozilla Public
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-brandShortName=Fennec
+-brandFullName=Mozilla Fennec
++brandShortName=FennecKiosk
++brandFullName=Mozilla Kiosk Fennec
