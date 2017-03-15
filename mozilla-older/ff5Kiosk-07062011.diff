@@ -1,0 +1,457 @@
+diff -r f1acd88f828e browser/app/README.txt
+--- a/browser/app/README.txt	Tue Jun 14 16:07:29 2011 -0700
++++ b/browser/app/README.txt	Wed Jul 06 10:13:29 2011 -0500
+@@ -1,3 +1,22 @@
++This browser is part of the Kiosk Project http://stlouis-shopper.com/~jtjsoftware/kiosk
++
++Contact Jim massey@stlouis-shopper.com for comments, bug reports or commercial support.
++
++Kiosk browser has features targted for kiosk environments:
++
++- Custom cursors for touchscreen use:
++   -moz-kioskDot
++   -moz-kioskBlank
++These may be used from user-chrome.css and user-content.css. -moz-kioskBlank is a invisible cursor good for use in touchscreen only setups.
++
++- Custom prefs:
++   kiosk.print.allowed true/false - defaults to false to block all printing
++   kiosk.browser.downloads.enabled true/false - defaults to false to block downloads
++
++- Kiosk xpi pre installed. Look in ./chrome/app-chrome.manifest to see the list of pre installed kiosk chromes. To start a given kiosk chrome, from a terminal do "kiosk -chrome chrome://kiosk/content/nameOf-kiosk.xul" To start the standard firefox chrome do "./kiosk -chrome chrome://browser/content"
++
++- Kiosk browser is based on Firefox 5(http://hg.mozilla.org/releases/mozilla-beta/) so:
++
+ For information about installing, running and configuring Firefox 
+ including a list of known issues and troubleshooting information, 
+ refer to: http://getfirefox.com/releases/
+diff -r f1acd88f828e browser/app/application.ini
+--- a/browser/app/application.ini	Tue Jun 14 16:07:29 2011 -0700
++++ b/browser/app/application.ini	Wed Jul 06 10:13:29 2011 -0500
+@@ -37,8 +37,8 @@
+ 
+ #filter substitution
+ [App]
+-Vendor=Mozilla
+-Name=Firefox
++Vendor=JTJSoftware
++Name=Kiosk
+ Version=@APP_VERSION@
+ BuildID=@GRE_BUILDID@
+ #ifdef MOZ_SOURCE_REPO
+diff -r f1acd88f828e browser/app/profile/firefox.js
+--- a/browser/app/profile/firefox.js	Tue Jun 14 16:07:29 2011 -0700
++++ b/browser/app/profile/firefox.js	Wed Jul 06 10:13:29 2011 -0500
+@@ -135,7 +135,7 @@
+ pref("app.update.certs.2.commonName", "aus3.mozilla.org");
+ 
+ // Whether or not app updates are enabled
+-pref("app.update.enabled", true);
++pref("app.update.enabled", false);
+ 
+ // This preference turns on app.update.mode and allows automatic download and
+ // install to take place. We use a separate boolean toggle for this to make
+@@ -1060,3 +1060,7 @@
+ pref("prompts.tab_modal.enabled", true);
+ // Whether the Panorama should animate going in/out of tabs
+ pref("browser.panorama.animate_zoom", true);
++
++// Kiosk specific prefs
++pref("kiosk.print.allowed", false);
++pref("kiosk.browser.downloads.enabled", false);
+diff -r f1acd88f828e browser/branding/aurora/branding.nsi
+--- a/browser/branding/aurora/branding.nsi	Tue Jun 14 16:07:29 2011 -0700
++++ b/browser/branding/aurora/branding.nsi	Wed Jul 06 10:13:29 2011 -0500
+@@ -40,7 +40,7 @@
+ 
+ # BrandFullNameInternal is used for some registry and file system values
+ # instead of BrandFullName and typically should not be modified.
+-!define BrandFullNameInternal "Aurora"
+-!define CompanyName           "mozilla.org"
+-!define URLInfoAbout          "http://www.mozilla.org"
+-!define URLUpdateInfo         "http://www.mozilla.org/projects/firefox"
++!define BrandFullNameInternal "Kiosk Browser"
++!define CompanyName           "JTJ Software"
++!define URLInfoAbout          "http://www.stlouis-shopper.com/~jtjsoftware/kiosk"
++!define URLUpdateInfo         "http://www.stlouis-shopper.com/~jtjsoftware/kiosk"
+diff -r f1acd88f828e browser/branding/aurora/configure.sh
+--- a/browser/branding/aurora/configure.sh	Tue Jun 14 16:07:29 2011 -0700
++++ b/browser/branding/aurora/configure.sh	Wed Jul 06 10:13:29 2011 -0500
+@@ -1,1 +1,1 @@
+-MOZ_APP_DISPLAYNAME=Aurora
++MOZ_APP_DISPLAYNAME=Kiosk
+diff -r f1acd88f828e browser/branding/aurora/locales/en-US/brand.dtd
+--- a/browser/branding/aurora/locales/en-US/brand.dtd	Tue Jun 14 16:07:29 2011 -0700
++++ b/browser/branding/aurora/locales/en-US/brand.dtd	Wed Jul 06 10:13:29 2011 -0500
+@@ -1,4 +1,4 @@
+-<!ENTITY  brandShortName        "Aurora">
+-<!ENTITY  brandFullName         "Aurora">
+-<!ENTITY  vendorShortName       "Mozilla">
++<!ENTITY  brandShortName        "Kiosk">
++<!ENTITY  brandFullName         "Kiosk Browser">
++<!ENTITY  vendorShortName       "JTJ Software">
+ <!ENTITY  trademarkInfo.part1   " ">
+diff -r f1acd88f828e browser/branding/aurora/locales/en-US/brand.properties
+--- a/browser/branding/aurora/locales/en-US/brand.properties	Tue Jun 14 16:07:29 2011 -0700
++++ b/browser/branding/aurora/locales/en-US/brand.properties	Wed Jul 06 10:13:29 2011 -0500
+@@ -1,3 +1,3 @@
+-brandShortName=Aurora
+-brandFullName=Aurora
+-vendorShortName=Mozilla
++brandShortName=Kiosk
++brandFullName=Kiosk Browser
++vendorShortName=JTJ Software
+diff -r f1acd88f828e browser/branding/unofficial/branding.nsi
+--- a/browser/branding/unofficial/branding.nsi	Tue Jun 14 16:07:29 2011 -0700
++++ b/browser/branding/unofficial/branding.nsi	Wed Jul 06 10:13:29 2011 -0500
+@@ -40,7 +40,7 @@
+ 
+ # BrandFullNameInternal is used for some registry and file system values
+ # instead of BrandFullName and typically should not be modified.
+-!define BrandFullNameInternal "Mozilla Developer Preview"
+-!define CompanyName           "mozilla.org"
+-!define URLInfoAbout          "http://www.mozilla.org"
+-!define URLUpdateInfo         "http://www.mozilla.org/projects/firefox"
++!define BrandFullNameInternal "Kiosk Browser"
++!define CompanyName           "JTJ Software"
++!define URLInfoAbout          "http://www.stlouis-shopper.com/~jtjsoftware/kiosk"
++!define URLUpdateInfo         "http://www.stlouis-shopper.com/~jtjsoftware/kiosk"
+diff -r f1acd88f828e browser/branding/unofficial/configure.sh
+--- a/browser/branding/unofficial/configure.sh	Tue Jun 14 16:07:29 2011 -0700
++++ b/browser/branding/unofficial/configure.sh	Wed Jul 06 10:13:29 2011 -0500
+@@ -1,1 +1,1 @@
+-MOZ_APP_DISPLAYNAME=MozillaDeveloperPreview
++MOZ_APP_DISPLAYNAME=KioskBrowser
+diff -r f1acd88f828e browser/branding/unofficial/locales/en-US/brand.dtd
+--- a/browser/branding/unofficial/locales/en-US/brand.dtd	Tue Jun 14 16:07:29 2011 -0700
++++ b/browser/branding/unofficial/locales/en-US/brand.dtd	Wed Jul 06 10:13:29 2011 -0500
+@@ -1,4 +1,4 @@
+-<!ENTITY  brandShortName        "Mozilla Developer Preview">
+-<!ENTITY  brandFullName         "Mozilla Developer Preview">
+-<!ENTITY  vendorShortName       "mozilla.org">
+-<!ENTITY  trademarkInfo.part1   " ">
++<!ENTITY  brandShortName        "Kiosk">
++<!ENTITY  brandFullName         "Kiosk Browser">
++<!ENTITY  vendorShortName       "JTJ Software">
++<!ENTITY  trademarkInfo.part1   "Some parts copyright @2011 Jim Massey - JTJ Software ">
+diff -r f1acd88f828e browser/branding/unofficial/locales/en-US/brand.properties
+--- a/browser/branding/unofficial/locales/en-US/brand.properties	Tue Jun 14 16:07:29 2011 -0700
++++ b/browser/branding/unofficial/locales/en-US/brand.properties	Wed Jul 06 10:13:29 2011 -0500
+@@ -1,3 +1,3 @@
+-brandShortName=Mozilla Developer Preview
+-brandFullName=Mozilla Developer Preview
+-vendorShortName=mozilla.org
++brandShortName=Kiosk
++brandFullName=Kiosk Browser
++vendorShortName=JTJ Software
+diff -r f1acd88f828e browser/confvars.sh
+--- a/browser/confvars.sh	Tue Jun 14 16:07:29 2011 -0700
++++ b/browser/confvars.sh	Wed Jul 06 10:13:29 2011 -0500
+@@ -36,7 +36,7 @@
+ #
+ # ***** END LICENSE BLOCK *****
+ 
+-MOZ_APP_NAME=firefox
++MOZ_APP_NAME=kiosk
+ MOZ_UPDATER=1
+ MOZ_PHOENIX=1
+ 
+diff -r f1acd88f828e browser/installer/package-manifest.in
+--- a/browser/installer/package-manifest.in	Tue Jun 14 16:07:29 2011 -0700
++++ b/browser/installer/package-manifest.in	Wed Jul 06 10:13:29 2011 -0500
+@@ -25,6 +25,8 @@
+ #endif
+ 
+ [@AB_CD@]
++@BINPATH@/chrome/kiosk.jar
++@BINPATH@/chrome/kiosk.manifest
+ @BINPATH@/chrome/@AB_CD@@JAREXT@
+ @BINPATH@/chrome/@AB_CD@.manifest
+ @BINPATH@/@PREF_DIR@/firefox-l10n.js
+diff -r f1acd88f828e browser/locales/en-US/README.txt
+--- a/browser/locales/en-US/README.txt	Tue Jun 14 16:07:29 2011 -0700
++++ b/browser/locales/en-US/README.txt	Wed Jul 06 10:13:29 2011 -0500
+@@ -1,3 +1,23 @@
++
++This browser is part of the Kiosk Project http://stlouis-shopper.com/~jtjsoftware/kiosk
++
++Contact Jim massey@stlouis-shopper.com for comments, bug reports or commercial support.
++
++Kiosk browser has features targted for kiosk environments:
++
++- Custom cursors for touchscreen use:
++   -moz-kioskDot
++   -moz-kioskBlank
++These may be used from user-chrome.css and user-content.css. -moz-kioskBlank is a invisible cursor good for use in touchscreen only setups.
++
++- Custom prefs:
++   kiosk.print.allowed true/false - defaults to false to block all printing
++   kiosk.browser.downloads.enabled true/false - defaults to false to block downloads
++
++- Kiosk xpi pre installed. Look in ./chrome/app-chrome.manifest to see the list of pre installed kiosk chromes. To start a given kiosk chrome, from a terminal do "kiosk -chrome chrome://kiosk/content/nameOf-kiosk.xul" To start the standard firefox chrome do "./kiosk -chrome chrome://browser/content"
++
++- Kiosk browser is based on Firefox 5(http://hg.mozilla.org/releases/mozilla-beta/) so:
++
+ For information about installing, running and configuring Firefox 
+ including a list of known issues and troubleshooting information, 
+ refer to: http://getfirefox.com/releases/
+diff -r f1acd88f828e configure.in
+--- a/configure.in	Tue Jun 14 16:07:29 2011 -0700
++++ b/configure.in	Wed Jul 06 10:13:29 2011 -0500
+@@ -1998,10 +1998,10 @@
+ MOZILLA_VERSION=`$PERL $srcdir/config/milestone.pl -topsrcdir $srcdir`
+ 
+ dnl Get version of various core apps from the version files.
+-FIREFOX_VERSION=`cat $_topsrcdir/browser/config/version.txt`
+-
+-if test -z "$FIREFOX_VERSION"; then
+-    AC_MSG_ERROR([FIREFOX_VERSION is unexpectedly blank.])
++KIOSK_VERSION=`cat $_topsrcdir/browser/config/version.txt`
++
++if test -z "$KIOSK_VERSION"; then
++    AC_MSG_ERROR([KIOSK_VERSION is unexpectedly blank.])
+ fi
+ 
+ AC_DEFINE_UNQUOTED(MOZILLA_VERSION,"$MOZILLA_VERSION")
+@@ -5055,7 +5055,7 @@
+ MOZ_ARG_ENABLE_STRING(application,
+ [  --enable-application=APP
+                           Options include:
+-                            browser (Firefox)
++                            browser (kiosk)
+                             xulrunner
+                             content/xslt (Standalone Transformiix XSLT)
+                             netwerk (Standalone Necko)
+@@ -9025,9 +9025,9 @@
+ AC_SUBST(MOZ_APP_UA_NAME)
+ AC_DEFINE_UNQUOTED(MOZ_APP_UA_VERSION, "$MOZ_APP_VERSION")
+ AC_SUBST(MOZ_APP_VERSION)
+-AC_DEFINE_UNQUOTED(MOZ_UA_FIREFOX_VERSION, "$FIREFOX_VERSION")
++AC_DEFINE_UNQUOTED(MOZ_UA_FIREFOX_VERSION, "$KIOSK_VERSION")
+ AC_SUBST(MOZ_UA_FIREFOX_VERSION)
+-AC_SUBST(FIREFOX_VERSION)
++AC_SUBST(KIOSK_VERSION)
+ AC_DEFINE_UNQUOTED(MOZ_UA_BUILDID, "$MOZ_UA_BUILDID")
+ AC_SUBST(MOZ_UA_BUILDID)
+ 
+diff -r f1acd88f828e content/events/src/nsEventStateManager.cpp
+--- a/content/events/src/nsEventStateManager.cpp	Tue Jun 14 16:07:29 2011 -0700
++++ b/content/events/src/nsEventStateManager.cpp	Wed Jul 06 10:13:29 2011 -0500
+@@ -3565,6 +3565,12 @@
+   case NS_STYLE_CURSOR_NONE:
+     c = eCursor_none;
+     break;
++  case NS_STYLE_CURSOR_MOZ_KIOSKDOT:
++    c = eCursor_kioskdot;
++    break;
++  case NS_STYLE_CURSOR_MOZ_KIOSKBLANK:
++    c = eCursor_kioskblank;
++    break;
+   }
+ 
+   // First, try the imgIContainer, if non-null
+diff -r f1acd88f828e dom/base/nsGlobalWindow.cpp
+--- a/dom/base/nsGlobalWindow.cpp	Tue Jun 14 16:07:29 2011 -0700
++++ b/dom/base/nsGlobalWindow.cpp	Wed Jul 06 10:13:29 2011 -0500
+@@ -10073,6 +10073,10 @@
+         cursor = NS_STYLE_CURSOR_GRABBING;
+       else if (cursorString.Equals("spinning"))
+         cursor = NS_STYLE_CURSOR_SPINNING;
++      else if (cursorString.Equals("kioskdot"))
++        cursor = NS_STYLE_CURSOR_MOZ_KIOSKDOT;
++      else if (cursorString.Equals("kioskblank"))
++        cursor = NS_STYLE_CURSOR_MOZ_KIOSKBLANK;
+       else
+         return NS_OK;
+     }
+diff -r f1acd88f828e layout/base/nsStyleConsts.h
+--- a/layout/base/nsStyleConsts.h	Tue Jun 14 16:07:29 2011 -0700
++++ b/layout/base/nsStyleConsts.h	Wed Jul 06 10:13:29 2011 -0500
+@@ -384,6 +384,8 @@
+ #define NS_STYLE_CURSOR_NS_RESIZE               34
+ #define NS_STYLE_CURSOR_EW_RESIZE               35
+ #define NS_STYLE_CURSOR_NONE                    36
++#define NS_STYLE_CURSOR_MOZ_KIOSKDOT            37
++#define NS_STYLE_CURSOR_MOZ_KIOSKBLANK          39
+ 
+ // See nsStyleDisplay
+ #define NS_STYLE_DIRECTION_LTR                  0
+diff -r f1acd88f828e layout/style/nsCSSKeywordList.h
+--- a/layout/style/nsCSSKeywordList.h	Tue Jun 14 16:07:29 2011 -0700
++++ b/layout/style/nsCSSKeywordList.h	Wed Jul 06 10:13:29 2011 -0500
+@@ -130,6 +130,8 @@
+ CSS_KEY(-moz-japanese-informal, _moz_japanese_informal)
+ CSS_KEY(-moz-kannada, _moz_kannada)
+ CSS_KEY(-moz-khmer, _moz_khmer)
++CSS_KEY(-moz-kioskdot, _moz_kioskdot)
++CSS_KEY(-moz-kioskblank, _moz_kioskblank)
+ CSS_KEY(-moz-lao, _moz_lao)
+ CSS_KEY(-moz-left, _moz_left)
+ CSS_KEY(-moz-list, _moz_list)
+diff -r f1acd88f828e layout/style/nsCSSProps.cpp
+--- a/layout/style/nsCSSProps.cpp	Tue Jun 14 16:07:29 2011 -0700
++++ b/layout/style/nsCSSProps.cpp	Wed Jul 06 10:13:29 2011 -0500
+@@ -844,6 +844,8 @@
+   eCSSKeyword__moz_grabbing, NS_STYLE_CURSOR_GRABBING,
+   eCSSKeyword__moz_zoom_in, NS_STYLE_CURSOR_MOZ_ZOOM_IN,
+   eCSSKeyword__moz_zoom_out, NS_STYLE_CURSOR_MOZ_ZOOM_OUT,
++  eCSSKeyword__moz_kioskdot, NS_STYLE_CURSOR_MOZ_KIOSKDOT,
++  eCSSKeyword__moz_kioskblank, NS_STYLE_CURSOR_MOZ_KIOSKBLANK,
+   eCSSKeyword_UNKNOWN,-1
+ };
+ 
+diff -r f1acd88f828e other-licenses/branding/firefox/branding.nsi
+--- a/other-licenses/branding/firefox/branding.nsi	Tue Jun 14 16:07:29 2011 -0700
++++ b/other-licenses/branding/firefox/branding.nsi	Wed Jul 06 10:13:29 2011 -0500
+@@ -40,7 +40,7 @@
+ 
+ # BrandFullNameInternal is used for some registry and file system values
+ # instead of BrandFullName and typically should not be modified.
+-!define BrandFullNameInternal "Mozilla Firefox"
+-!define CompanyName           "Mozilla Corporation"
+-!define URLInfoAbout          "http://www.mozilla.com/${AB_CD}/"
+-!define URLUpdateInfo         "http://www.mozilla.com/${AB_CD}/firefox/"
++!define BrandFullNameInternal "Kiosk Browser"
++!define CompanyName           "JTJ Software"
++!define URLInfoAbout          "http://www.stlouis-shopper.com/~jtjsoftware/kiosk/"
++!define URLUpdateInfo         "http://www.stlouis-shopper.com/~jtjsoftware/kiosk/"
+diff -r f1acd88f828e other-licenses/branding/firefox/configure.sh
+--- a/other-licenses/branding/firefox/configure.sh	Tue Jun 14 16:07:29 2011 -0700
++++ b/other-licenses/branding/firefox/configure.sh	Wed Jul 06 10:13:29 2011 -0500
+@@ -1,2 +1,2 @@
+-MOZ_APP_DISPLAYNAME=Firefox
++MOZ_APP_DISPLAYNAME=Kiosk
+ MOZ_UA_BUILDID=20100101
+diff -r f1acd88f828e toolkit/mozapps/installer/packager.mk
+--- a/toolkit/mozapps/installer/packager.mk	Tue Jun 14 16:07:29 2011 -0700
++++ b/toolkit/mozapps/installer/packager.mk	Wed Jul 06 10:13:29 2011 -0500
+@@ -397,6 +397,8 @@
+ 
+ NON_OMNIJAR_FILES += \
+   chrome/icons/\* \
++  chrome/kiosk.jar \
++  chrome/kiosk.manifest \
+   defaults/pref/channel-prefs.js \
+   res/cursors/\* \
+   res/MainMenu.nib/\* \
+@@ -412,7 +414,7 @@
+   $(GENERATE_CACHE) && \
+   $(OPTIMIZE_JARS_CMD) --optimize $(_ABS_DIST)/jarlog/ ./ ./ && \
+   mv binary.manifest components && \
+-  printf "manifest components/binary.manifest\n" > chrome.manifest
++  printf "manifest components/binary.manifest\nmanifest chrome/kiosk.manifest" > chrome.manifest
+ UNPACK_OMNIJAR	= \
+   $(OPTIMIZE_JARS_CMD) --deoptimize $(_ABS_DIST)/jarlog/ ./ ./ && \
+   unzip -o omni.jar && \
+diff -r f1acd88f828e widget/public/nsIWidget.h
+--- a/widget/public/nsIWidget.h	Tue Jun 14 16:07:29 2011 -0700
++++ b/widget/public/nsIWidget.h	Wed Jul 06 10:13:29 2011 -0500
+@@ -183,6 +183,8 @@
+                 eCursor_ns_resize,
+                 eCursor_ew_resize,
+                 eCursor_none,
++                eCursor_kioskdot,
++                eCursor_kioskblank,
+                 // This one better be the last one in this list.
+                 eCursorCount
+                 }; 
+diff -r f1acd88f828e widget/src/gtk2/nsGtkCursors.h
+--- a/widget/src/gtk2/nsGtkCursors.h	Tue Jun 14 16:07:29 2011 -0700
++++ b/widget/src/gtk2/nsGtkCursors.h	Wed Jul 06 10:13:29 2011 -0500
+@@ -399,6 +399,59 @@
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+ 
++static unsigned char moz_kioskdot_bits[] = {
++   0x00, 0x80, 0x01, 0x00, 0x00, 0x80, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
++
++static unsigned char moz_kioskdot_mask_bits[] = {
++   0x00, 0x80, 0x01, 0x00, 0x00, 0x80, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
++
++static unsigned char moz_kioskblank_bits[] = {
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
++
++static unsigned char moz_kioskblank_mask_bits[] = {
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
++   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
++
++
+ enum {
+   MOZ_CURSOR_HAND_GRAB,
+   MOZ_CURSOR_HAND_GRABBING,
+@@ -412,7 +465,9 @@
+   MOZ_CURSOR_VERTICAL_TEXT,
+   MOZ_CURSOR_NESW_RESIZE,
+   MOZ_CURSOR_NWSE_RESIZE,
+-  MOZ_CURSOR_NONE
++  MOZ_CURSOR_NONE,
++  MOZ_CURSOR_KIOSKDOT,
++  MOZ_CURSOR_KIOSKBLANK
+ };
+ 
+ // create custom pixmap cursor
+@@ -429,7 +484,9 @@
+   { moz_vertical_text_bits,  moz_vertical_text_mask_bits,  8,  4  },
+   { moz_nesw_resize_bits,    moz_nesw_resize_mask_bits,    8,  8  },
+   { moz_nwse_resize_bits,    moz_nwse_resize_mask_bits,    8,  8  },
+-  { moz_none_bits,           moz_none_mask_bits,           0,  0  }
++  { moz_none_bits,           moz_none_mask_bits,           0,  0  },
++  { moz_kioskdot_bits,       moz_kioskdot_mask_bits,       15, 0  },
++  { moz_kioskblank_bits,     moz_kioskblank_mask_bits,     0,  0  }
+ };
+ 
+ #endif /* nsGtkCursors_h__ */
+diff -r f1acd88f828e widget/src/gtk2/nsWindow.cpp
+--- a/widget/src/gtk2/nsWindow.cpp	Tue Jun 14 16:07:29 2011 -0700
++++ b/widget/src/gtk2/nsWindow.cpp	Wed Jul 06 10:13:29 2011 -0500
+@@ -5487,6 +5487,12 @@
+     case eCursor_none:
+         newType = MOZ_CURSOR_NONE;
+         break;
++    case eCursor_kioskdot:
++        newType = MOZ_CURSOR_KIOSKDOT;
++        break;
++    case eCursor_kioskblank:
++        newType = MOZ_CURSOR_KIOSKBLANK;
++        break;
+     default:
+         NS_ASSERTION(aCursor, "Invalid cursor type");
+         gdkcursor = gdk_cursor_new(GDK_LEFT_PTR);
